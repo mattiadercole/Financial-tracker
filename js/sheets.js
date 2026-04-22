@@ -126,7 +126,7 @@ const Sheets = (() => {
     const data = await apiRequest('POST',
       'https://sheets.googleapis.com/v4/spreadsheets',
       {
-        properties: { title: 'Sosoldi — Finanze Personali' },
+        properties: { title: 'Financial Tracker' },
         sheets: [{ properties: { title: 'Info' } }]
       }
     );
