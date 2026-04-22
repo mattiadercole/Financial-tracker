@@ -2,7 +2,7 @@
 //  SOSOLDI — Service Worker
 // ═══════════════════════════════════════════════
 
-const CACHE = 'sosoldi-v1';
+const CACHE = 'financial-tracker-v1';
 const ASSETS = [
   '/',
   '/index.html',
