@@ -1,9 +1,9 @@
 {
-  "name": "Financial Tracker",
-  "short_name": "Financial Tracker",
+  "name": "Sosoldi — Finanze Personali",
+  "short_name": "Sosoldi",
   "description": "Gestione finanziaria personale con Google Sheets",
-  "start_url": "/Financial-tracker/",
-  "scope": "/Financial-tracker/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0a0f",
