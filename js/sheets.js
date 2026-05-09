@@ -81,7 +81,7 @@ const Sheets = (() => {
   // ── Spreadsheet bootstrap ────────────────────
   async function createSpreadsheet() {
     const d = await api('POST','https://sheets.googleapis.com/v4/spreadsheets',{
-      properties: { title: 'Sosoldi — Finanze Personali' },
+      properties: { title: 'Financial Tracker — Finanze Personali' },
       sheets: [{ properties: { title: 'Info' } }]
     });
     _sheetId = d.spreadsheetId;
