@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0a0a0f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Financial Tracker"/>
+  <title>Financial Tracker</title>
+  <meta name="application-name" content="Financial Tracker">
+  <meta name="apple-mobile-web-app-title" content="Financial Tracker">
+  <!-- Performance: preconnect fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/app.css"/>
+</head>
+<body>
+
+<!-- ══ SETUP ══════════════════════════════════ -->
+<div id="setup-screen" class="screen active">
+  <div class="setup-bg">
+    <div class="setup-orb orb1"></div><div class="setup-orb orb2"></div><div class="setup-orb orb3"></div>
+  </div>
+  <div class="setup-content">
+    <div class="logo-lockup">
+      <div class="logo-mark">€</div>
+      <h1 class="logo-text">Financial Tracker</h1>
+      <p class="logo-sub">gestione finanziaria personale</p>
+    </div>
+    <div class="setup-card">
+      <h2>Configura la tua app</h2>
+      <p class="setup-desc">Inserisci le credenziali Google per connettere Sosoldi al tuo foglio di calcolo. <a href="#" id="help-link" class="link">Come ottenerle?</a></p>
+      <div class="field-group"><label>Client ID Google</label><input type="text" id="client-id-input" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false"/></div>
+      <div class="field-group"><label>Spreadsheet ID <span class="hint">(vuoto = crea nuovo)</span></label><input type="text" id="sheet-id-input" placeholder="opzionale" autocomplete="off" spellcheck="false"/></div>
+      <button class="btn-primary" id="connect-btn"><span class="btn-icon">G</span> Connetti con Google</button>
+    </div>
+    <div class="help-overlay" id="help-overlay">
+      <div class="help-modal">
+        <button class="help-close" id="help-close">✕</button>
+        <h3>Come ottenere le credenziali</h3>
+        <ol class="help-steps">
+          <li>Vai su <strong>console.cloud.google.com</strong> → Nuovo progetto</li>
+          <li>Abilita <strong>Google Sheets API</strong> e <strong>Google Drive API</strong></li>
+          <li>Credenziali → Crea → <strong>ID client OAuth 2.0</strong> → Applicazione web</li>
+          <li>Aggiungi il tuo URL GitHub Pages come origine autorizzata</li>
+          <li>Copia il <strong>Client ID</strong> e incollalo sopra</li>
+        </ol>
+        <button class="btn-secondary" id="help-close-btn">Capito!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════ -->
+<div id="app-screen" class="screen">
+
+  <header class="topbar">
+    <span class="topbar-logo">Financial Tracker</span>
+    <div class="topbar-center">
+      <select id="month-select" class="month-picker"></select>
+      <select id="year-select"  class="year-picker"></select>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="refresh-btn" title="Aggiorna">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
+      <!-- ← SETTINGS spostato qui dal bottom nav -->
+      <button class="icon-btn" id="settings-nav-btn" title="Impostazioni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="loading-overlay" class="loading-overlay hidden"><div class="spinner"></div><p id="loading-text">Caricamento...</p></div>
+  <div id="toast" class="toast hidden"></div>
+
+  <main class="main-content">
+
+    <!-- DASHBOARD -->
+    <section id="tab-dashboard" class="tab-content active">
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-entrate"><div class="kpi-label">Entrate</div><div class="kpi-value" id="kpi-entrate">€0,00</div><div class="kpi-bar"><div class="kpi-bar-fill" id="bar-entrate"></div></div></div>
+        <div class="kpi-card kpi-uscite"><div class="kpi-label">Uscite</div><div class="kpi-value" id="kpi-uscite">€0,00</div><div class="kpi-bar"><div class="kpi-bar-fill" id="bar-uscite"></div></div></div>
+        <div class="kpi-card kpi-saldo full-width"><div class="kpi-label">Saldo del mese</div><div class="kpi-value large" id="kpi-saldo">€0,00</div><div class="kpi-sub" id="kpi-risparmio">Tasso di risparmio: —</div></div>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><h3>Distribuzione Spese</h3><span class="section-badge" id="chart-month-label"></span></div>
+        <div class="chart-wrap"><canvas id="pie-chart"></canvas><div class="chart-empty hidden" id="chart-empty"><span>Nessuna spesa</span></div></div>
+        <div class="legend" id="pie-legend"></div>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><h3>Ultime transazioni</h3><button class="link-btn" id="view-all-btn">Vedi tutte →</button></div>
+        <div id="recent-list" class="tx-list"></div>
+      </div>
+    </section>
+
+    <!-- TRANSAZIONI -->
+    <section id="tab-transazioni" class="tab-content">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Transazioni</h3>
+          <div class="filter-row">
+            <button class="filter-btn active" data-filter="all">Tutte</button>
+            <button class="filter-btn" data-filter="Entrata">Entrate</button>
+            <button class="filter-btn" data-filter="Uscita">Uscite</button>
+          </div>
+        </div>
+        <div id="tx-list-full" class="tx-list"></div>
+        <div id="tx-empty" class="empty-state hidden"><div class="empty-icon">📭</div><p>Nessuna transazione</p></div>
+      </div>
+    </section>
+
+    <!-- AGGIUNGI -->
+    <section id="tab-aggiungi" class="tab-content">
+      <div class="section-card form-card">
+        <h3>Nuova Transazione</h3>
+        <div class="type-toggle">
+          <button class="type-btn active" data-type="Uscita"><span>↑</span> Uscita</button>
+          <button class="type-btn" data-type="Entrata"><span>↓</span> Entrata</button>
+        </div>
+        <div class="form-fields">
+          <div class="field-group"><label>Importo</label><div class="amount-input-wrap"><span class="currency-sign">€</span><input type="number" id="tx-amount" placeholder="0,00" step="0.01" min="0" inputmode="decimal"/></div></div>
+          <div class="field-group"><label>Descrizione</label><input type="text" id="form-desc" placeholder="es. Spesa supermercato"/></div>
+          <div class="field-group"><label>Categoria</label><select id="form-category"></select></div>
+          <div class="field-group"><label>Data</label><input type="date" id="form-date"/></div>
+          <div class="field-group"><label>Note <span class="hint">(opzionale)</span></label><input type="text" id="form-notes" placeholder="Aggiunta opzionale..."/></div>
+        </div>
+        <button class="btn-primary" id="save-tx-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Salva transazione
+        </button>
+      </div>
+    </section>
+
+    <!-- RIEPILOGO -->
+    <section id="tab-riepilogo" class="tab-content">
+      <div class="section-card">
+        <div class="section-header"><h3>Spese per Categoria</h3></div>
+        <div id="cat-breakdown" class="cat-list"></div>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><h3>Riepilogo Mensile <span id="annual-year"></span></h3></div>
+        <div class="annual-table-wrap">
+          <table class="annual-table"><thead><tr><th>Mese</th><th>Entrate</th><th>Uscite</th><th>Saldo</th></tr></thead><tbody id="annual-tbody"></tbody></table>
+        </div>
+        <div class="bar-chart-wrap" style="margin-top:16px"><canvas id="bar-chart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- SPESE FISSE & RATE -->
+    <section id="tab-spese" class="tab-content">
+      <!-- Fixed expenses -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>💳 Spese Fisse Mensili</h3>
+          <button class="btn-small btn-accent" id="add-fixed-btn">+ Aggiungi</button>
+        </div>
+        <p class="settings-desc">Spese ricorrenti ogni mese (affitto, abbonamenti, utenze…)</p>
+        <div id="fixed-list" class="tx-list"></div>
+        <div class="fixed-total-row"><span id="fixed-total" class="fixed-total"></span></div>
+      </div>
+      <!-- Installments -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>📆 Spese Rateizzate</h3>
+          <button class="btn-small btn-accent" id="add-install-btn">+ Aggiungi</button>
+        </div>
+        <p class="settings-desc">Acquisti pagati a rate (elettrodomestici, auto, telefono…)</p>
+        <div id="install-list"></div>
+      </div>
+    </section>
+
+    <!-- INVESTIMENTI -->
+    <section id="tab-investimenti" class="tab-content">
+      <!-- KPIs -->
+      <div class="kpi-grid kpi-grid-4">
+        <div class="kpi-card"><div class="kpi-label">Capitale Investito</div><div class="kpi-value inv-val" id="inv-kpi-invested">€0,00</div></div>
+        <div class="kpi-card"><div class="kpi-label">Valore Attuale</div><div class="kpi-value inv-val" id="inv-kpi-current" style="color:var(--accent2)">€0,00</div></div>
+        <div class="kpi-card"><div class="kpi-label">Rendimento €</div><div class="kpi-value inv-val" id="inv-kpi-gain">+€0,00</div></div>
+        <div class="kpi-card"><div class="kpi-label">Rendimento %</div><div class="kpi-value inv-val" id="inv-kpi-pct">+0%</div></div>
+      </div>
+      <!-- Allocation chart -->
+      <div class="section-card">
+        <div class="section-header"><h3>Allocazione Portafoglio</h3></div>
+        <div class="chart-wrap"><canvas id="invest-pie-chart"></canvas></div>
+        <div class="legend" id="invest-pie-legend"></div>
+      </div>
+      <!-- Plans -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>📈 Piani di Investimento</h3>
+          <div style="display:flex;gap:6px"><button class="btn-small btn-refresh" id="auto-update-prices-btn">🔄 Prezzi</button><button class="btn-small btn-accent" id="add-invest-btn">+ Nuovo</button></div>
+        </div>
+        <div id="invest-list"></div>
+      </div>
+    </section>
+
+    <!-- IMPOSTAZIONI -->
+    <section id="tab-impostazioni" class="tab-content">
+      <div class="section-card">
+        <div class="section-header"><h3>⚙️ Categorie</h3></div>
+        <p class="settings-desc">Gestisci le categorie per entrate e uscite.</p>
+        <div class="settings-block"><div class="settings-block-header"><span class="settings-block-label">🔴 Uscite</span><span class="settings-cat-count" id="count-exp"></span></div><div id="settings-cats-exp" class="settings-cat-chips"></div></div>
+        <div class="settings-block"><div class="settings-block-header"><span class="settings-block-label">🟢 Entrate</span><span class="settings-cat-count" id="count-inc"></span></div><div id="settings-cats-inc" class="settings-cat-chips"></div></div>
+        <button class="btn-primary" id="open-cat-manager-btn" style="margin-top:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Gestisci categorie
+        </button>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><h3>🔗 Account</h3></div>
+        <p class="settings-desc">Connesso con Google. I dati sono salvati nel tuo Google Drive.</p>
+        <button class="btn-danger" id="logout-btn-settings">Disconnetti account Google</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV (5 items: 2 + center + 2) -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-tab="dashboard" id="nav-dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+      <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" data-tab="transazioni" id="nav-transazioni">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+      <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+      <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+    </svg>
+    <span>Movimenti</span>
+  </button>
+
+  <!-- TASTO + AL CENTRO -->
+  <button class="nav-btn nav-btn-add" id="nav-add-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <button class="nav-btn" data-tab="fisso" id="nav-fisso">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+    <span>Fisso</span>
+  </button>
+  <button class="nav-btn" data-tab="investimenti" id="nav-investimenti">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+      <polyline points="17 6 23 6 23 12"/>
+    </svg>
+    <span>Invest.</span>
+  </button>
+</nav>
+
+  <!-- MODALS BACKDROPS -->
+  <div class="modal-backdrop" id="edit-modal-overlay"></div>
+  <div class="modal-backdrop" id="fixed-modal-overlay"></div>
+  <div class="modal-backdrop" id="install-modal-overlay"></div>
+  <div class="modal-backdrop" id="invest-modal-overlay"></div>
+  <div class="modal-backdrop" id="deposit-modal-overlay"></div>
+  <div class="modal-backdrop" id="cat-modal-overlay"></div>
+
+  <!-- EDIT TX MODAL -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-header"><h3>Modifica Transazione</h3><span id="edit-type-label" class="modal-type-badge"></span><button class="modal-close" id="edit-modal-close">✕</button></div>
+    <div class="modal-body"><div class="form-fields">
+      <div class="field-group"><label>Importo</label><div class="amount-input-wrap"><span class="currency-sign">€</span><input type="number" id="edit-amount" step="any" min="0" inputmode="decimal"/></div></div>
+      <div class="field-group"><label>Descrizione</label><input type="text" id="edit-desc"/></div>
+      <div class="field-group"><label>Categoria</label><select id="edit-category"></select></div>
+      <div class="field-group"><label>Data</label><input type="date" id="edit-date"/></div>
+      <div class="field-group"><label>Note</label><input type="text" id="edit-notes"/></div>
+    </div></div>
+    <div class="modal-footer"><button class="btn-secondary" id="edit-cancel-btn">Annulla</button><button class="btn-primary" id="edit-save-btn" style="flex:1">Salva modifiche</button></div>
+  </div>
+
+  <!-- FIXED EXPENSE MODAL -->
+  <div class="modal" id="fixed-modal">
+    <div class="modal-header"><h3 id="fixed-modal-title">Nuova Spesa Fissa</h3><button class="modal-close" id="fixed-modal-close">✕</button></div>
+    <div class="modal-body"><div class="form-fields">
+      <div class="field-group"><label>Nome</label><input type="text" id="fixed-name" placeholder="es. Affitto, Netflix..."/></div>
+      <div class="field-group"><label>Importo mensile (€)</label><div class="amount-input-wrap"><span class="currency-sign">€</span><input type="number" id="fixed-amount" step="any" min="0" inputmode="decimal"/></div></div>
+      <div class="field-group"><label>Categoria</label><select id="fixed-category"></select></div>
+      <div class="field-group"><label>Giorno del mese</label><input type="number" id="fixed-day" min="1" max="31" value="1"/></div>
+      <div class="field-group"><label>Note</label><input type="text" id="fixed-note"/></div>
+      <div class="field-group" style="flex-direction:row;align-items:center;gap:10px">
+        <input type="checkbox" id="fixed-active" checked style="width:auto;padding:0"/>
+        <label for="fixed-active" style="color:var(--text)">Spesa attiva</label>
+      </div>
+    </div></div>
+    <div class="modal-footer"><button class="btn-secondary" id="fixed-cancel-btn">Annulla</button><button class="btn-primary" id="fixed-save-btn" style="flex:1">Salva</button></div>
+  </div>
+
+  <!-- INSTALLMENT MODAL -->
+  <div class="modal" id="install-modal">
+    <div class="modal-header"><h3>Nuova Spesa Rateizzata</h3><button class="modal-close" id="install-modal-close">✕</button></div>
+    <div class="modal-body"><div class="form-fields">
+      <div class="field-group"><label>Nome</label><input type="text" id="install-name" placeholder="es. iPhone, Lavatrice..."/></div>
+      <div class="field-group"><label>Importo totale (€)</label><div class="amount-input-wrap"><span class="currency-sign">€</span><input type="number" id="install-total" step="any" min="0" inputmode="decimal"/></div></div>
+      <div class="field-group"><label>Numero di rate</label><input type="number" id="install-nrates" min="2" placeholder="es. 12"/></div>
+      <div class="field-group"><label>Importo rata (€) <span class="hint">calcolato auto</span></label><div class="amount-input-wrap"><span class="currency-sign">€</span><input type="number" id="install-amount" step="any" min="0" inputmode="decimal"/></div></div>
+      <div class="field-group"><label>Categoria</label><select id="install-category"></select></div>
+      <div class="field-group"><label>Data inizio</label><input type="date" id="install-start"/></div>
+      <div class="field-group"><label>Note</label><input type="text" id="install-note"/></div>
+    </div></div>
+    <div class="modal-footer"><button class="btn-secondary" id="install-cancel-btn">Annulla</button><button class="btn-primary" id="install-save-btn" style="flex:1">Aggiungi</button></div>
+  </div>
+
+  <!-- INVESTMENT MODAL -->
+  <div class="modal" id="invest-modal">
+    <div class="modal-header"><h3 id="invest-modal-title">Nuovo Piano</h3><button class="modal-close" id="invest-modal-close">✕</button></div>
+    <div class="modal-body"><div class="form-fields">
+      <div class="field-group"><label>Nome piano</label><input type="text" id="invest-name" placeholder="es. ETF World, BTC PAC..."/></div>
+      <div class="field-group"><label>Piattaforma</label><select id="invest-platform"></select></div>
+      <div class="field-group"><label>Tipo</label><select id="invest-type"></select></div>
+      <div class="field-group"><label>Ticker / ISIN <span class="hint">(opzionale)</span></label><input type="text" id="invest-ticker" placeholder="es. VWCE, IE00B3RBWM25"/></div>
+      <div class="field-group"><label>Data inizio</label><input type="date" id="invest-start"/></div>
+      <div class="field-group"><label>Frequenza versamenti</label><select id="invest-freq"></select></div>
+      <div class="field-group"><label>Importo periodico (€) <span class="hint">(se automatico)</span></label><div class="amount-input-wrap"><span class="currency-sign">€</span><input type="number" id="invest-periodic" step="any" min="0" inputmode="decimal" placeholder="0,00"/></div></div>
+      <div class="field-group"><label>Note</label><input type="text" id="invest-note"/></div>
+    </div></div>
+    <div class="modal-footer"><button class="btn-secondary" id="invest-cancel-btn">Annulla</button><button class="btn-primary" id="invest-save-btn" style="flex:1">Salva piano</button></div>
+  </div>
+
+  <!-- DEPOSIT MODAL -->
+  <div class="modal" id="deposit-modal">
+    <div class="modal-header"><h3>Nuovo Versamento</h3><button class="modal-close" id="deposit-modal-close">✕</button></div>
+    <div class="modal-body">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Piano: <strong id="deposit-plan-name" style="color:var(--accent2)"></strong></p>
+      <div class="form-fields">
+        <div class="field-group"><label>Importo (€)</label><div class="amount-input-wrap"><span class="currency-sign">€</span><input type="number" id="deposit-amount" step="any" min="0" inputmode="decimal"/></div></div>
+        <div class="field-group"><label>Data</label><input type="date" id="deposit-date"/></div>
+        <div class="field-group"><label>Note <span class="hint">(opzionale)</span></label><input type="text" id="deposit-note"/></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" id="deposit-cancel-btn">Annulla</button><button class="btn-primary" id="deposit-save-btn" style="flex:1">Registra versamento</button></div>
+  </div>
+
+  <!-- CATEGORY MODAL -->
+  <div class="modal modal-tall" id="cat-modal">
+    <div class="modal-header"><h3>Gestisci Categorie</h3><button class="modal-close" id="cat-modal-close">✕</button></div>
+    <div class="cat-tabs"><button class="cat-tab-btn active" data-cattype="Uscita">🔴 Uscite</button><button class="cat-tab-btn" data-cattype="Entrata">🟢 Entrate</button></div>
+    <div class="modal-body modal-body-scroll">
+      <div id="cat-list-editable" class="cat-editable-list"></div>
+      <div class="cat-add-form">
+        <p class="cat-add-title">+ Aggiungi nuova categoria</p>
+        <input type="hidden" id="new-cat-type" value="Uscita"/>
+        <div class="cat-add-row">
+          <input type="text" id="new-cat-name" placeholder="es. 🏋️ Palestra" class="cat-add-input"/>
+          <input type="color" id="new-cat-color" value="#6366f1" class="cat-color-picker"/>
+          <button class="btn-add-cat" id="add-category-btn">Aggiungi</button>
+        </div>
+        <p class="hint" style="margin-top:6px">Inizia il nome con un'emoji per un effetto migliore ✨</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
+<script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
